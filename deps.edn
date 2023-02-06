@@ -1,0 +1,23 @@
+{:paths   ["src/main"]
+ :deps    {org.clojure/clojure       {:mvn/version "1.11.1"}
+           org.clojure/clojurescript {:mvn/version "1.11.60"}}
+
+ :aliases {:dev      {:extra-paths ["src/dev"]
+                      :extra-deps  {binaryage/devtools         {:mvn/version "1.0.6"}
+                                    cider/cider-nrepl          {:mvn/version "0.29.0"}
+                                    thheller/shadow-cljs       {:mvn/version "2.20.14"}
+                                    funcool/promesa            {:mvn/version "10.0.571"}
+                                    applied-science/js-interop {:mvn/version "0.3.3"}}}
+
+           :examples {:extra-paths ["src/examples"]}
+
+           :test     {:extra-paths ["src/test"]
+                      :extra-deps  {org.slf4j/slf4j-nop    {:mvn/version "2.0.6"}
+                                    lambdaisland/kaocha    {:mvn/version "1.71.1119"}
+                                    io.github.jarppe/match {:git/tag "v0.0.2"
+                                                            :git/sha "84473a4"}}}
+
+           :locals   {:override-deps {io.github.jarppe/match {:local/root "../../../metosin/test-match"}}}
+
+           :outdated {:replace-deps {olical/depot {:mvn/version "2.3.0"}}
+                      :main-opts    ["-m" "depot.outdated.main" "--aliases" "dev,test"]}}}

@@ -1,0 +1,18 @@
+{:deps     {:aliases [:dev :test :examples :locals]}
+ :builds   {:web  {:target     :browser
+                   :output-dir "public/js"
+                   :asset-path "js"
+                   :modules    {:main {:entries [hello.app]}}
+                   :dev        {:closure-defines {umpi.core/DEV true}}
+                   :release    {:closure-defines {umpi.core/DEV false}}
+                   :devtools   {:after-load hello.app/start}}
+            :node {:target           :node-library
+                   :output-to        "target/node/index.js"
+                   :output-dir       "target/node/js"
+                   :exports          {:main user/hello}
+                   :compiler-options {:output-feature-set :es-next}}
+            :test {:target     :node-test
+                   :output-to  "target/test/index.js"
+                   :output-dir "target/test/js"
+                   :autorun    true}}
+ :dev-http {8000 {:root "public"}}}
