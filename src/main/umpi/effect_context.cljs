@@ -72,7 +72,6 @@
     (push-effect-build-context!)
     (try
       (effect-fn)
-      this
       (finally
         (let [used-signals (pop-effect-build-context!)
               old-signals  (set/difference signals used-signals)

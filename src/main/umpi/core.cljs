@@ -15,22 +15,14 @@
 
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
-(defn create-effect [f]
-  (ec/effect-context f))
+(defn create-effect
+  ([f] (create-effect f nil))
+  ([f meta]
+   (ec/effect-context f meta)))
 
 
 (defn- render-view [view]
-  (render/render view)
-  #_(let [h1   (js/document.createElement "h1")
-          _    (set! (.-innerText h1) "Hello!")
-          _    (set! (.-id h1) "the-h1")
-          div1 (doto (js/document.createElement "div")
-                 (.appendChild h1)
-                 (.setAttribute "foo" "42"))
-          div2 (doto (js/document.createElement "div")
-                 (.appendChild div1)
-                 (.setAttribute "bar" "boz"))]
-      div2))
+  (render/render view))
 
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}

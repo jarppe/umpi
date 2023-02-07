@@ -17,36 +17,42 @@
 
 
 (defn- set-class-list [^js e classes]
-  ; TODO: should we cache classes?
-  ; TODO: handle case classes contains signal(s)
+  ; TODO: should we cache classes somewhere?
+  ; TODO: handle case where class value is signal
   (let [class-list      (go/get e "classList")
-        current-classes (set class-list)
+        current-classes (set (.entries class-list))
         classes         (->> classes
                              (map (fn [class]
                                     (if (keyword? class) (name class) (str class))))
                              (set))
         remove-classes  (set/difference current-classes classes)
         new-classes     (set/difference classes current-classes)]
-    (js/console.log "set-class-list" classes
-                    "\ncurrent:" current-classes
-                    "\nremove-classes:" remove-classes
-                    "\nnew-classes:" new-classes)
     (doseq [remove-class remove-classes]
-      (js/console.log "removing class" remove-class)
       (.remove class-list remove-class))
     (doseq [new-class new-classes]
-      (js/console.log "adding class" new-class)
       (.add class-list new-class))))
 
 
+(defn- toggle-class [^js e class-name activate?]
+  (let [class-list (go/get e "classList")]
+    (if activate?
+      (.add class-list class-name)
+      (.remove class-list class-name))))
+
+
 (defn- set-class [^js e class]
-  ; TODO: handle case class is signal
-  ; TODO: handle case where one of the class values is signal
   (cond
     (nil? class) (set-class-list e [])
     (string? class) (set-class-list e [class])
-    (map? class) (set-class-list e (keep (fn [[k v]] (when v k)) class))
+    (map? class) (set-class-list e (keep (fn [[k v]]
+                                           (if (signal/signal? v)
+                                             (let [class-name (name k)]
+                                               (ec/effect-context (fn [] (toggle-class e class-name @v)))
+                                               nil)
+                                             (when v k)))
+                                         class))
     (sequential? class) (set-class-list e class)
+    (signal/signal? class) (ec/effect-context (fn [] (set-class e @class)))
     :else (throw (ex-info (str "invalid value for element class: " (pr-str class)) {}))))
 
 
@@ -126,8 +132,9 @@
 
 (defn- render-vector-fn [tag props children]
   (cc/push-component-build-context!)
-  (let [x (tag (assoc props :children children))
-        e (r/-render x)]
+  (let [effect-fn (fn []
+                    (r/-render (tag (assoc props :children children))))
+        e         (ec/effect-context effect-fn)]
     (set-on-unmount e (cc/pop-component-build-context!))))
 
 

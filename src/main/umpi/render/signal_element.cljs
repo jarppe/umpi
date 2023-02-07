@@ -7,6 +7,6 @@
   (let [e         (js/document.createTextNode "")
         effect-fn (fn []
                     (let [value (str @signal)]
-                      (.replaceData e 0 (count value) value)))]
+                      (.replaceData e 0 -1 value)))]
     (cc/add-effect-context (ec/effect-context effect-fn))
     e))
