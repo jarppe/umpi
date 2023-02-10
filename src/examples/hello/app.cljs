@@ -3,36 +3,32 @@
   (:require-macros [umpi.core :refer [with-effect]]))
 
 
-(def a (umpi/create-signal 0))
-
 
 (def colors ["hotpink" "turquoise" "tomato" "blue" "lime" "violet" "pink"])
 
 
+(defn get-color [n]
+  (nth colors (mod n (count colors))))
+
+
 (defn Hello []
-  (let [color (umpi/create-signal nil)]
+  (let [counter (umpi/create-signal 0)
+        color   (umpi/create-signal nil)]
     (with-effect
-      (reset! color (nth colors (mod @a (count colors)))))
+      (reset! color (get-color @counter)))
     [:div {:class "container"}
-     [:h1 "Hello: " [:span {:style {:color color}} a]]
+     [:h1 {:style {:margin-top "2em"}} "Hello: "
+      [:span {:style {:color color}} counter]]
      [:div {:class "buttons"}
       [:a {:href     "#"
            :role     "button"
-           :on-click (fn [e]
-                       (println "click" e)
-                       (swap! a inc))}
-       "+"]
-      [:a {:href     "#"
-           :role     "button"
-           :on-click (fn [e]
-                       (println "click" e)
-                       (swap! a dec))}
-       "-"]]]))
+           :on-click (fn [_] (swap! counter inc))
+           :style    {:width "10em"}}
+       "+"]]]))
 
 
 (defonce root (umpi/create-root (js/document.getElementById "app")))
 
 
 (defn ^:export start []
-  (println "start")
   (umpi/render [Hello] root))

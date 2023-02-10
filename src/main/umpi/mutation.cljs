@@ -3,7 +3,6 @@
 
 
 (defn mutation-remove-node [^js node]
-  (println "removing node" node)
   (when-let [on-unmount (go/get node "on-unmount")]
     (on-unmount))
   (doseq [child (.-childNodes node)]
