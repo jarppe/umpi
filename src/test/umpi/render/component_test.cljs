@@ -27,34 +27,34 @@
 
 (deftest set-class-test
   (testing "Seting nil does not add classes"
-    (let [e (m/mock-element "div")]
+    (let [e (m/create-element "div")]
       (set-class e nil)
       (is (= #{} (-> e .-classList .entries set)))))
   (testing "Seting nil removes existing classes"
-    (let [e (m/mock-element "div")]
+    (let [e (m/create-element "div")]
       (set-class e "foo")
       (set-class e nil)
       (is (= #{} (-> e .-classList .entries set)))))
   (testing "Seting static class"
-    (let [e (m/mock-element "div")]
+    (let [e (m/create-element "div")]
       (set-class e "foo")
       (is (= #{"foo"} (-> e .-classList .entries set)))))
   (testing "Seting static class list"
-    (let [e (m/mock-element "div")]
+    (let [e (m/create-element "div")]
       (set-class e ["foo" "bar"])
       (is (= #{"foo" "bar"} (-> e .-classList .entries set)))))
   (testing "Adding static class list"
-    (let [e (m/mock-element "div")]
+    (let [e (m/create-element "div")]
       (set-class e "foo")
       (set-class e ["foo" "bar"])
       (is (= #{"foo" "bar"} (-> e .-classList .entries set)))))
   (testing "Removing static class list"
-    (let [e (m/mock-element "div")]
+    (let [e (m/create-element "div")]
       (set-class e ["foo" "bar"])
       (set-class e ["bar"])
       (is (= #{"bar"} (-> e .-classList .entries set)))))
   (testing "Using map to set static classes"
-    (let [e (m/mock-element "div")]
+    (let [e (m/create-element "div")]
       (set-class e {"foo" true
                     "bar" false
                     "boz" true})
@@ -63,7 +63,7 @@
 
 (deftest set-class-dynamic-class-test
   (async done
-         (let [e (m/mock-element "div")
+         (let [e (m/create-element "div")
                s (signal/signal "foo")]
            (set-class e s)
            (is (= #{"foo"} (-> e .-classList .entries set)))
@@ -75,7 +75,7 @@
 
 (deftest set-class-dynamic-class-list-test
   (async done
-         (let [e (m/mock-element "div")
+         (let [e (m/create-element "div")
                s (signal/signal "foo")]
            (set-class e s)
            (is (= #{"foo"} (-> e .-classList .entries set)))
@@ -87,7 +87,7 @@
 
 (deftest set-class-map-with-dynamic-class-test
   (async done
-         (let [e (m/mock-element "div")
+         (let [e (m/create-element "div")
                s (signal/signal false)]
            (set-class e {:foo true
                          :bar s})

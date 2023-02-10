@@ -53,7 +53,8 @@
                                          class))
     (sequential? class) (set-class-list e class)
     (signal/signal? class) (ec/effect-context (fn [] (set-class e @class)))
-    :else (throw (ex-info (str "invalid value for element class: " (pr-str class)) {}))))
+    :else (throw (ex-info (str "invalid value for element class: " (pr-str class)) {})))
+  e)
 
 
 (defn- set-style [^js e style]
@@ -72,7 +73,8 @@
       (when-let [static-style (:static styles)]
         (go/set css "cssText" static-style))
       (doseq [[style-name signal] (:dynamic styles)]
-        (ec/effect-context (fn [] (go/set css style-name @signal)))))))
+        (ec/effect-context (fn [] (go/set css style-name @signal))))))
+  e)
 
 
 (defn- add-listener [^js e k listener]
@@ -82,20 +84,19 @@
                                 :once    false
                                 :passive false})
                         (clj->js))]
-    (.addEventListener e event-name listener opts)
-    e))
+    (.addEventListener e event-name listener opts))
+  e)
 
 
 (defn- set-attr [^js e k v]
-  (println "set-attr" e k v)
   (case k
     :class (set-class e v)
     :style (set-style e v)
-    (if (str/starts-with? (name k) "on-")
-      (add-listener e k v)
-      (.setAttribute e
-                     (if (keyword? k) (name k) (str k))
-                     (str v)))))
+    (cond
+      (str/starts-with? (name k) "on-") (add-listener e k v)
+      (signal/signal? v) (ec/effect-context (fn [] (set-attr e k @v)))
+      :else (.setAttribute e (name k) (str v))))
+  e)
 
 
 (defn- set-on-unmount [e effect-contexts]
@@ -117,7 +118,7 @@
     e))
 
 
-(defn- render-vector-kw [tag props children]
+(defn- render-vector-keyword [tag props children]
   (let [e (js/document.createElement (name tag))]
     (cc/push-component-build-context!)
     (doseq [[k v] props]
@@ -132,9 +133,8 @@
 
 (defn- render-vector-fn [tag props children]
   (cc/push-component-build-context!)
-  (let [effect-fn (fn []
-                    (r/-render (tag (assoc props :children children))))
-        e         (ec/effect-context effect-fn)]
+  (let [e (ec/effect-context (fn []
+                               (r/-render (tag (assoc props :children children)))))]
     (set-on-unmount e (cc/pop-component-build-context!))))
 
 
@@ -142,7 +142,7 @@
   (let [[tag props children] (normalize-render-vector data)]
     (cond
       (= tag :<>) (render-vector-fragment props children)
-      (keyword? tag) (render-vector-kw tag props children)
+      (keyword? tag) (render-vector-keyword tag props children)
       (fn? tag) (render-vector-fn tag props children)
       :else (throw (ex-info "unsupported component form" {:tag tag})))))
 

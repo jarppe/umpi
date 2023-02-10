@@ -23,4 +23,5 @@
 
 
 (defn add-effect-context [effect-context]
-  (swap! component-build-context append-effect-context effect-context))
+  (when effect-context
+    (swap! component-build-context append-effect-context effect-context)))

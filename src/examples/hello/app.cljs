@@ -6,11 +6,11 @@
 (def a (umpi/create-signal 0))
 
 
-(def colors ["hotpink" "turquoise" "tomato" "blue" "lime" "violet"])
+(def colors ["hotpink" "turquoise" "tomato" "blue" "lime" "violet" "pink"])
 
 
 (defn Hello []
-  (let [color (umpi/create-signal (first colors))]
+  (let [color (umpi/create-signal nil)]
     (with-effect
       (reset! color (nth colors (mod @a (count colors)))))
     [:div {:class "container"}
@@ -36,7 +36,3 @@
 (defn ^:export start []
   (println "start")
   (umpi/render [Hello] root))
-
-(comment
-
-  (nth colors (mod 1 (count colors))))
